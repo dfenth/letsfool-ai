@@ -38,34 +38,53 @@
 </head>
 <body>
     <h1 class="display-3">letsfool.ai</h1>
+    <h2>Welcome!</h2>
+    <p>
+        This web app is a simple MNIST classifier with an explanation component. The black square below is a canvas you can draw on (with a finger or a mouse, 
+        depending on your device). After clicking submit, the canvas content is sent to the model for classification. The results show the model's softmax output 
+        (the probabilities that the input belongs to each class), followed by an explanation of why the model thinks the highest-probability class is the correct 
+        one. An explanation of the explanation process is in the paragraph below. The interesting part of the explanation is that we can figure out how to fool a 
+        model into confidently returning a response even if we just give it something semantically meaningless (see examples below). This all shows us just how 
+        easy it is to fool AI, and maybe why we shouldn't put too much trust in its results.
+    </p>
+    <h2>Explanation</h2>
+    <p>
+        This classifier returns three pieces of data. The original input image, the softmax probabilities of the classifier, and the explanation 
+        for why a classification has been made. The explanation is the most interesting part because we can have the model explain the classification 
+        it has given, which opens up the otherwise closed-box AI system. 
+        <br>
+        The heat map shows us the parts of the image that are important to the classification. Red indicates a positive contribution to the class, grey 
+        does not contribute to the class, and blue areas reduce the class probability. This is produced using <a href="https://arxiv.org/abs/1703.01365">Integrated Gradients</a> 
+        from the <a href="https://captum.ai">Captum</a> library.
+
+        To compute the integrated gradients of a model \(F\), we start with the input to the model \(x\) and a baseline \(x'\). The baseline is essentially an input 
+        that should elicit no meaningful response from the network (a response that is as uniform as possible). In the case of images, this would be a black image. 
+        We select a dimension \(i\) (a pixel in the case of images) and take a path integral of the gradient along a linear interpolation from \(x\) to \(x'\):
+            
+        \[
+            IG_i(x) := (x_i - x_i') \cdot \int^1_{\alpha=0} \frac{\partial F (x' + \alpha (x-x'))}{\partial x_i} d\alpha
+        \]
+
+        Since \(\alpha \in [0,1]\), we gradually move along the path from a completely black image to the original colour version. While this is happening, 
+        we're paying close attention to the rate of change of the model output with respect to \(x_i\). This allows us to understand the importance of dimension \(i\) to 
+        the classification. Doing this for each pixel (or group of pixels) will enable us to see what parts of the input contribute most strongly to the output! 
+    </p>
+    <h2>Let's Fool AI</h2>
+    <p>
+        We can start with a basic classification task.
+        <img src="static/full5.png"style="width:500px; display:block; margin:0 auto;">
+        From this we can see that the top of the 5 is important (a squared off 'c'), followed by the end of the hook. So what happens if we remove the centre part of the 5?
+        <img src="static/part5.png"style="width:500px; display:block; margin:0 auto;">
+        It's still pretty confident it's a 5. But as a human we can kind of tell it's still a 5. But from that last run we can see that we can represent a 5 with just three lines:
+        <img src="static/less5.png"style="width:500px; display:block; margin:0 auto;">
+        The model is still quite sure that's a 5! 
+    </p>
+    
     <canvas id="drawCanvas" width="280px" height="280px" style="border:1px solid #000; background-color:rgb(72, 255, 0)" ></canvas><br>
     <button id="submit" class="btn btn-primary">Classify</button>
     <button id="clearBtn" class="btn btn-secondary">Clear</button>
 
-    <details>
-        <summary><b>Explanation</b></summary>
-        <p>
-            This classifier returns three pieces of data. The original input image, the softmax probabilities of the classifier, and the explanation 
-            for why a classification has been made. The explanation is the most interesting part because we can have the model explain the classification 
-            it has given, which opens up the otherwise closed-box AI system. 
-            <br>
-            The heat map shows us the parts of the image that are important to the classification. Red indicates a positive contribution to the class, grey 
-            does not contribute to the class, and blue areas reduce the class probability. This is produced using <a href="https://arxiv.org/abs/1703.01365">Integrated Gradients</a> 
-            from the <a href="https://captum.ai">Captum</a> library.
-
-            To compute the integrated gradients of a model \(F\), we start with the input to the model \(x\) and a baseline \(x'\). The baseline is essentially an input 
-            that should elicit no meaningful response from the network (a response that is as uniform as possible). In the case of images, this would be a black image. 
-            We select a dimension \(i\) (a pixel in the case of images) and take a path integral of the gradient along a linear interpolation from \(x\) to \(x'\):
-            
-            \[
-                IG_i(x) := (x_i - x_i') \cdot \int^1_{\alpha=0} \frac{\partial F (x' + \alpha (x-x'))}{\partial x_i} d\alpha
-            \]
-
-            Since \(\alpha \in [0,1]\), we gradually move along the path from a completely black image to the original colour version. While this is happening, 
-            we're paying close attention to the rate of change of the model output with respect to \(x_i\). This allows us to understand the importance of dimension \(i\) to 
-            the classification. Doing this for each pixel (or group of pixels) will enable us to see what parts of the input contribute most strongly to the output! 
-        </p>
-    </details>
+    
 
     <div id="results"></div>
 
