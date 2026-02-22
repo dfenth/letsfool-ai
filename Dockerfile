@@ -19,7 +19,7 @@ RUN pip install --upgrade pip && \
 # ----------- Runtime container ---------------
 FROM python:3.12-slim-bookworm
 
-EXPOSE 8000
+EXPOSE 8080
 
 # Create a non-privileged user
 RUN groupadd -r user && useradd -r -s /bin/false -g user user
@@ -47,4 +47,4 @@ RUN mkdir -p /home/user/.config/matplotlib && \
 USER user
 
 HEALTHCHECK CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"
-CMD ["gunicorn", "main:app", "--worker-class", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:8000", "--workers", "1", "--timeout", "60", "--access-logfile", "-", "--error-logfile", "-"]
+CMD ["gunicorn", "main:app", "--worker-class", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:8080", "--workers", "1", "--timeout", "60", "--access-logfile", "-", "--error-logfile", "-"]
