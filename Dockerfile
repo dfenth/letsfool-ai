@@ -15,9 +15,16 @@ COPY requirements.txt .
 RUN pip install --upgrade pip && \
     pip wheel --no-cache-dir --no-deps --wheel-dir /wheels -r requirements.txt
 
+WORKDIR /app
+COPY letsfool/static/* /app/static/
+COPY letsfool/main.py /app
+COPY letsfool/mnist_model.py /app
+COPY letsfool/mnist_model.pth /app
+
 
 # ----------- Runtime container ---------------
 FROM python:3.12-slim-bookworm
+LABEL maintainer="dxf209@student.bham.ac.uk"
 
 EXPOSE 8080
 
@@ -36,6 +43,9 @@ RUN pip install --upgrade pip && \
 # Copy application code
 COPY . .
 RUN chown -R user:user /app
+
+# Copy files to runtime
+COPY --from=buildstage /app /app
 
 # Set up a dir for matplotlib to write to
 ENV MPLBACKEND=Agg
