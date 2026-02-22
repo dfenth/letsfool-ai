@@ -189,6 +189,7 @@ class MNISTModel(AbsModel):
 def transform_mnist_dataset(dataset):
     """
     Transform the MNIST like datasets, scaling the values and expanding dimensions
+    (includes random Affine transformation).
 
     Parameters:
     dataset (list of (numpy.ndarray, int)): The dataset to transform
@@ -196,13 +197,6 @@ def transform_mnist_dataset(dataset):
     Returns:
     - ret_dataset (list of (numpy.ndarray, int)): The transformed dataset
     """
-    # ret_dataset = []
-    # for image, label in dataset:
-    #     image = torch.tensor((np.expand_dims(image, axis=0)/255.), dtype=torch.float32)
-    #     ret_dataset.append((image, label))
-
-    # return ret_dataset
-
     # Set up transform pipeline
     dataset_transforms = torch.nn.Sequential(
         torchvision.transforms.Normalize([0.], [255.]),
