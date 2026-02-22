@@ -10,6 +10,7 @@ import base64
 import numpy as np
 import captum
 import io
+import os
 from PIL import Image
 
 from mnist_model import MNISTModel, bytes_to_tensor
@@ -63,12 +64,16 @@ app = FastAPI()
 
 app.mount("/static", StaticFiles(directory='static', html=True), name='static')
 
+# Set origin as an environment variable to keep things flexible
+# Multiple origins can be specified with comma separation
+origins = [o.strip() for o in os.getenv("ALLOWED_ORIGINS", default="http://localhost:8000").split(",")]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # NOTE: DO NOT USE IN PRODUCTION
-    allow_credentials = True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=origins,
+    allow_credentials = False,
+    allow_methods=["POST", "GET"],
+    allow_headers=["Content-Type"],
 )
 
 @app.on_event("startup")
@@ -92,8 +97,7 @@ def get_frontend():
 
 @app.post("/classify")
 async def classify_image(request: ImageRequest):
-    # data = await request.json()
-    image_data = request.image #data["image"]
+    image_data = request.image
     _, encoded = image_data.split(",", 1)
     binary_data = base64.b64decode(encoded)
     image = bytes_to_tensor(binary_data).unsqueeze(dim=0)
