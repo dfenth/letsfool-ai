@@ -21,11 +21,25 @@ MAX_IMAGE_DIM = 280
 MAX_PAYLOAD_SIZE = 100000 # Translates to ~75KB of base64 data
 
 class ImageRequest(BaseModel):
+    """ImageRequest class that ensures a request involving an
+    image is valid by checking the input.
+    """
     image: str = Field(max_length=MAX_PAYLOAD_SIZE)
 
     @field_validator("image")
     @classmethod
-    def validate_image(cls, input_data):
+    def validate_image(cls, input_data: str) -> str:
+        """Validate that input data is a PNG image
+        
+        Args:
+            input_data (str): The Base64 input data
+        
+        Returns:
+            str: The validate input data
+        
+        Raises:
+            ValueError: If the data is not in a valid PNG format
+        """
         # Check that it's a PNG data URL (reject anything that isn't)
         if not input_data.startswith("data:image/png;base64,"):
             raise ValueError("User input must be a PNG data URL")
@@ -59,9 +73,10 @@ class ImageRequest(BaseModel):
         return input_data
 
 
-
+# Initialise the application
 app = FastAPI()
 
+# Give access to the static html files
 app.mount("/static", StaticFiles(directory='static', html=True), name='static')
 
 # Set origin as an environment variable to keep things flexible
@@ -78,6 +93,9 @@ app.add_middleware(
 
 @app.on_event("startup")
 def initialise():
+    """Initialises the application by creating models that will be used
+    throughout the lifetime of the application.
+    """
     global model
     model = MNISTModel()
     model.load_model()
@@ -91,12 +109,23 @@ def initialise():
 
 @app.get("/", response_class=HTMLResponse)
 def get_frontend():
+    """Gets the static html page allowing us to render it"""
     with open("static/index.html", 'r') as file:
         return file.read()
 
 
 @app.post("/classify")
-async def classify_image(request: ImageRequest):
+async def classify_image(request: ImageRequest) -> JSONResponse:
+    """Classifies an input image (after verification) when the user makes a request
+    from the web page.
+
+    Args:
+        request (ImageRequest): The Base64 encoded data corresponding to a PNG
+    
+    Returns:
+        JSONResponse: Returns the response to the web front end in JSON format which includes
+        the labels, softmax prediction values and explanation heat map
+    """
     image_data = request.image
     _, encoded = image_data.split(",", 1)
     binary_data = base64.b64decode(encoded)
