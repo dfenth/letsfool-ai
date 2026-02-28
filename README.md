@@ -1,7 +1,7 @@
 # LetsFool.ai
 This is a project looking at explainability in AI models (specifically image classifiers) and how we can use explainability to craft inputs that are incorrectly classified. The aim is to make a cool web app that people can experiment with. This is kind of a learning experience for me in developing web apps and deploying machine learning models in a *'production'* environment.
 
-The running web app is available at [letsfoolai.cloud](letsfoolai.cloud), and a deep dive into the particulars of this project can be found in my [blog post](https://dfnt.xyz/projects/ml/2026/02/28/letsfoolai.html).
+The running web app is available at [letsfoolai.cloud](https://letsfoolai.cloud), and a deep dive into the particulars of this project can be found in my [blog post](https://dfnt.xyz/projects/ml/2026/02/28/letsfoolai.html).
 
 This project uses the [Google Cloud Run](https://cloud.google.com/run) service to host the app, which also has nice integrations with GitHub for CI/CD, streamlining the workflow.
 
