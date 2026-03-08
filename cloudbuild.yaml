@@ -1,21 +1,21 @@
 steps:
 # Build image
 - name: 'gcr.io/cloud-builders/docker'
-  args: ['build', '-t', 'gcr.io/${PROJECT_ID}/letsfooldocker:${COMMIT_SHA}', '.']
+  args: ['build', '-t', 'gcr.io/${PROJECT_ID}/letsfool-ai:${COMMIT_SHA}', '.']
 # Push image to artefact registry
 - name: 'gcr.io/cloud-builders/docker'
-  args: ['push', 'gcr.io/${PROJECT_ID}/letsfooldocker:${COMMIT_SHA}']
+  args: ['push', 'gcr.io/${PROJECT_ID}/letsfool-ai:${COMMIT_SHA}']
 # Deploy to cloud run
 - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
   entrypoint: gcloud
   args: [
-    'run', 'deploy', 'letsfooldocker',
-    '--image', 'gcr.io/${PROJECT_ID}/letsfooldocker:${COMMIT_SHA}',
+    'run', 'deploy', 'letsfool-ai',
+    '--image', 'gcr.io/${PROJECT_ID}/letsfool-ai:${COMMIT_SHA}',
     '--region', 'europe-west1',
     '--platform', 'managed'
   ]
 
 images:
-- 'gcr.io/${PROJECT_ID}/letsfooldocker:${COMMIT_SHA}'
+- 'gcr.io/${PROJECT_ID}/letsfool-ai:${COMMIT_SHA}'
 options:
   logging: CLOUD_LOGGING_ONLY
