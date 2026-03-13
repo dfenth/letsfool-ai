@@ -21,10 +21,17 @@ class MNISTModel(AbsModel):
     """The MNIST model class inheriting from AbsModel"""
     def __init__(self):
         super(MNISTModel, self).__init__()
-        self.conv1 = torch.nn.Conv2d(in_channels=1, out_channels=32, kernel_size=5, padding=2)
-        self.conv2 = torch.nn.Conv2d(in_channels=32, out_channels=64, kernel_size=5, padding=2)
-        self.fc1 = torch.nn.Linear(7*7*64, 1024)
-        self.fc2 = torch.nn.Linear(1024, 10)
+        self.conv1 = torch.nn.Conv2d(in_channels=1, out_channels=16, kernel_size=5, padding=2)
+        self.relu1 = torch.nn.ReLU()
+        self.pool1 = torch.nn.MaxPool2d(kernel_size=2, stride=2)
+        self.conv2 = torch.nn.Conv2d(in_channels=16, out_channels=32, kernel_size=5, padding=2)
+        self.relu2 = torch.nn.ReLU()
+        self.pool2 = torch.nn.MaxPool2d(kernel_size=2, stride=2)
+        self.fc1 = torch.nn.Linear(7*7*32, 256)
+        self.relu3 = torch.nn.ReLU()
+        self.fc2 = torch.nn.Linear(256, 10)
+        self.dropout = torch.nn.Dropout(p=0.5)
+        self.flatten = torch.nn.Flatten()
 
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -37,19 +44,17 @@ class MNISTModel(AbsModel):
             torch.Tensor: The output logits
         """
         x = self.conv1(x)
-        x = torch.nn.functional.relu(x)
-        x = torch.nn.functional.max_pool2d(x, 2)
-        x = torch.nn.Dropout(p=0.5)(x)
+        x = self.relu1(x)
+        x = self.pool1(x)
 
         x = self.conv2(x)
-        x = torch.nn.functional.relu(x)
-        x = torch.nn.functional.max_pool2d(x, 2)
-        x = torch.nn.Dropout(p=0.5)(x)
+        x = self.relu2(x)
+        x = self.pool2(x)
         
-        x = torch.nn.Flatten()(x)
+        x = self.flatten(x)
         x = self.fc1(x)
-        x = torch.nn.functional.relu(x)
-        x = torch.nn.Dropout(p=0.5)(x)
+        x = self.relu3(x)
+        x = self.dropout(x)
         logits = self.fc2(x)
 
         out = logits
